@@ -1,13 +1,20 @@
+[providers]
+node = "18"
+
+[phases.setup]
+nixPkgs = ["nodejs_18", "npm"]
+
 [phases.install]
-cmd = "npm install --omit=dev --ignore-scripts"
+cmd = "npm install --production --no-package-lock --ignore-scripts"
 
 [phases.build]
-cmd = "echo 'Build completed'"
+cmd = "echo 'No build step needed'"
 
 [start]
-cmd = "npm start"
+cmd = "node app.js"
 
 [variables]
 NODE_ENV = "production"
 NPM_CONFIG_AUDIT = "false"
-NPM_CONFIG_FUND = "false" 
+NPM_CONFIG_FUND = "false"
+NPM_CONFIG_PACKAGE_LOCK = "false" 

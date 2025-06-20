@@ -1,5 +1,5 @@
 [deploy]
-  startCommand = "npm start"
+  dockerfilePath = "Dockerfile"
 
 [build.env]
   NODE_ENV = "production" 

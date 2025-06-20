@@ -1,0 +1,13 @@
+[phases.install]
+cmd = "npm install --omit=dev --ignore-scripts"
+
+[phases.build]
+cmd = "echo 'Build completed'"
+
+[start]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production"
+NPM_CONFIG_AUDIT = "false"
+NPM_CONFIG_FUND = "false" 

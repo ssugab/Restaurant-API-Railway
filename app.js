@@ -18,7 +18,11 @@ const app = express();
 // CORS configuration for production
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL, 'https://your-frontend-domain.vercel.app'] 
+    ? [
+        process.env.FRONTEND_URL, 
+        'https://pemesanan-menu-restoran-neydezgzf-bagus-projects-d637296f.vercel.app',
+        'https://pemesanan-menu-restoran.vercel.app' // fallback jika URL berubah
+      ] 
     : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

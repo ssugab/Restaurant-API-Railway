@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester - Restaurant Railway</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; white-space: pre-wrap; }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Restaurant API Tester</h1>
+    
+    <div class="test-section">
+        <h3>Railway URL Configuration</h3>
+        <input type="text" id="baseUrl" placeholder="https://your-railway-url.railway.app" />
+        <button onclick="saveUrl()">Set URL</button>
+        <p>Current URL: <span id="currentUrl">Not set</span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Health Check</h3>
+        <button onclick="testHealth()">Test /health</button>
+        <div id="healthResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Categories Test</h3>
+        <button onclick="testCategories()">GET /api/kategori</button>
+        <div id="categoriesResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Menu Test</h3>
+        <button onclick="testMenu()">GET /api/menu</button>
+        <div id="menuResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. CORS Test</h3>
+        <button onclick="testCors()">Test CORS Headers</button>
+        <div id="corsResult" class="result"></div>
+    </div>
+
+    <script>
+        let baseUrl = '';
+
+        function saveUrl() {
+            const url = document.getElementById('baseUrl').value.trim();
+            if (url) {
+                baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+                document.getElementById('currentUrl').textContent = baseUrl;
+                localStorage.setItem('railwayUrl', baseUrl);
+            }
+        }
+
+        // Load saved URL
+        window.onload = function() {
+            const saved = localStorage.getItem('railwayUrl');
+            if (saved) {
+                baseUrl = saved;
+                document.getElementById('baseUrl').value = saved;
+                document.getElementById('currentUrl').textContent = saved;
+            }
+        }
+
+        async function testHealth() {
+            const result = document.getElementById('healthResult');
+            if (!baseUrl) {
+                result.textContent = 'Please set Railway URL first!';
+                result.className = 'result error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/health`);
+                const data = await response.json();
+                result.textContent = `✅ Status: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+
+        async function testCategories() {
+            const result = document.getElementById('categoriesResult');
+            if (!baseUrl) {
+                result.textContent = 'Please set Railway URL first!';
+                result.className = 'result error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/api/kategori`);
+                const data = await response.json();
+                result.textContent = `✅ Status: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+
+        async function testMenu() {
+            const result = document.getElementById('menuResult');
+            if (!baseUrl) {
+                result.textContent = 'Please set Railway URL first!';
+                result.className = 'result error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/api/menu`);
+                const data = await response.json();
+                result.textContent = `✅ Status: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+
+        async function testCors() {
+            const result = document.getElementById('corsResult');
+            if (!baseUrl) {
+                result.textContent = 'Please set Railway URL first!';
+                result.className = 'result error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/health`, {
+                    method: 'OPTIONS'
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                };
+
+                result.textContent = `✅ CORS Headers:\n${JSON.stringify(corsHeaders, null, 2)}`;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ CORS Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html> 

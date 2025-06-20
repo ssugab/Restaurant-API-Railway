@@ -12,6 +12,7 @@
     "dev": "nodemon app.js",
     "debug-db": "node debug-db.js",
     "check-env": "node check-env.js",
+    "seed": "node seed-database.js",
     "build": "echo 'No build step required'",
     "test": "echo 'No tests specified'"
   },

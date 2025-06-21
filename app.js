@@ -56,6 +56,25 @@ const corsOptions = {
   exposedHeaders: ['Authorization']
 };
 
+// EMERGENCY CORS FIX - Manual headers
+app.use((req, res, next) => {
+  // Set CORS headers manually for all requests
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
+  res.header('Access-Control-Max-Age', '86400');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    console.log('🔧 Manual CORS - Handling OPTIONS preflight from:', req.headers.origin);
+    return res.status(200).end();
+  }
+  
+  console.log('🔧 Manual CORS - Request from:', req.headers.origin);
+  next();
+});
+
+// Keep the original CORS as backup
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

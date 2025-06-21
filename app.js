@@ -22,6 +22,7 @@ const corsOptions = {
         process.env.FRONTEND_URL,
         'https://pemesanan-menu-restoran-neydezgzf-bagus-projects-d637296f.vercel.app',
         'https://pemesanan-menu-restoran-l7a89bujt-bagus-projects-d637296f.vercel.app',
+        'https://pemesanan-menu-restoran-api.vercel.app',
         'https://pemesanan-menu-restoran.vercel.app',
         /https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/ // Pattern untuk semua deployment URL Vercel
       ] 

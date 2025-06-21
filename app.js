@@ -119,9 +119,25 @@ async function startServer() {
     await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
     console.log('All models were synchronized successfully.');
 
+    // Auto-seed database if RUN_SEED is true
+    if (process.env.RUN_SEED === 'true') {
+      console.log('🌱 RUN_SEED is enabled, seeding database...');
+      try {
+        const seedDatabase = require('./seed-database');
+        await seedDatabase();
+        console.log('✅ Database seeded successfully!');
+      } catch (seedError) {
+        console.error('❌ Error seeding database:', seedError);
+        // Don't exit, continue with server startup
+      }
+    }
+
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      if (process.env.RUN_SEED === 'true') {
+        console.log('🌱 Auto-seed was enabled for this startup');
+      }
     });
   } catch (error) {
     console.error('Unable to connect to the database:', error);

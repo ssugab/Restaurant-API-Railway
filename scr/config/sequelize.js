@@ -9,20 +9,13 @@ if (process.env.MYSQL_PUBLIC_URL) {
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     dialectOptions: {
       ssl: false,
-      family: 4,
-      connectTimeout: 60000,
-      acquireTimeout: 60000,
-      timeout: 60000
+      connectTimeout: 60000
     },
     pool: {
       max: 5,
       min: 0,
       acquire: 60000,
       idle: 10000
-    },
-    retry: {
-      match: [/ETIMEDOUT/, /EHOSTUNREACH/, /ECONNRESET/, /ECONNREFUSED/, /ESOCKETTIMEDOUT/, /EHOSTUNREACH/, /EPIPE/, /EAI_AGAIN/, /SequelizeConnectionError/, /SequelizeConnectionRefusedError/, /SequelizeHostNotFoundError/, /SequelizeInvalidConnectionError/, /SequelizeConnectionTimedOutError/],
-      max: 3
     }
   });
   module.exports = sequelize;
@@ -36,20 +29,13 @@ else if (process.env.MYSQL_URL || process.env.DATABASE_URL) {
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     dialectOptions: {
       ssl: false,
-      family: 4,
-      connectTimeout: 60000,
-      acquireTimeout: 60000,
-      timeout: 60000
+      connectTimeout: 60000
     },
     pool: {
       max: 5,
       min: 0,
       acquire: 60000,
       idle: 10000
-    },
-    retry: {
-      match: [/ETIMEDOUT/, /EHOSTUNREACH/, /ECONNRESET/, /ECONNREFUSED/, /ESOCKETTIMEDOUT/, /EHOSTUNREACH/, /EPIPE/, /EAI_AGAIN/, /SequelizeConnectionError/, /SequelizeConnectionRefusedError/, /SequelizeHostNotFoundError/, /SequelizeInvalidConnectionError/, /SequelizeConnectionTimedOutError/],
-      max: 3
     }
   });
   module.exports = sequelize;
@@ -68,20 +54,13 @@ else if (process.env.MYSQL_HOST && process.env.MYSQL_USER) {
       logging: process.env.NODE_ENV === 'development' ? console.log : false,
       dialectOptions: {
         ssl: false,
-        family: 4,
-        connectTimeout: 60000,
-        acquireTimeout: 60000,
-        timeout: 60000
+        connectTimeout: 60000
       },
       pool: {
         max: 5,
         min: 0,
         acquire: 60000,
         idle: 10000
-      },
-      retry: {
-        match: [/ETIMEDOUT/, /EHOSTUNREACH/, /ECONNRESET/, /ECONNREFUSED/, /ESOCKETTIMEDOUT/, /EHOSTUNREACH/, /EPIPE/, /EAI_AGAIN/, /SequelizeConnectionError/, /SequelizeConnectionRefusedError/, /SequelizeHostNotFoundError/, /SequelizeInvalidConnectionError/, /SequelizeConnectionTimedOutError/],
-        max: 3
       }
     }
   );

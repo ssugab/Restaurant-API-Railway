@@ -39,4 +39,21 @@
 - `/cors-test` ⏳ (should work after deployment)
 - `/test-cors-simple.html` ⏳ (should work after deployment)
 
-This file is created to trigger Railway auto-deployment. 
+This file is created to trigger Railway auto-deployment.
+
+# Deploy Trigger
+
+Trigger deployment: 2025-06-21 14:14:00
+
+## Status
+- Manual CORS headers added
+- Emergency test routes added  
+- Force redeploy triggered
+
+## Changes Made
+1. Added `simple-cors-test` endpoint
+2. Added `test-cors-emergency.html` route  
+3. Manual CORS headers in middleware
+4. Wildcard CORS enabled
+
+Railway please redeploy NOW! 

@@ -1,3 +1,5 @@
+## THIS FOLDER IS NOT USE
+
 # Restaurant API - Railway Deployment
 
 Backend API untuk aplikasi pemesanan menu restoran yang di-deploy di Railway.

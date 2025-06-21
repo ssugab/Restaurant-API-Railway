@@ -49,12 +49,21 @@ const allowedOrigins = [
 console.log('- Allowed origins:', allowedOrigins.join(', '));
 
 const corsOptions = {
-  origin: '*', // TEMPORARY: Allow all origins for debugging
-  credentials: false, // Must be false with wildcard
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Origin', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Authorization']
 };
+
+app.use(cors(corsOptions));
+
 
 // EMERGENCY CORS FIX - Manual headers
 app.use((req, res, next) => {
@@ -150,6 +159,82 @@ app.get('/api/seed', async (req, res) => {
 // Test route
 app.get('/test', (req, res) => {
   res.json({ message: 'Server is running!', timestamp: new Date().toISOString() });
+});
+
+// EMERGENCY CORS TEST - HTML Page
+app.get('/test-cors-emergency.html', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency CORS Test</title>
+</head>
+<body>
+    <h1>🚨 Emergency CORS Test - Railway Direct</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        results.innerHTML += '<h2>Testing CORS dari Railway langsung...</h2>';
+        
+        // Test 1: Simple CORS endpoint
+        fetch('https://graceful-benevolence-production.up.railway.app/simple-cors-test')
+            .then(r => {
+                results.innerHTML += '<p>✅ Simple CORS: ' + r.status + '</p>';
+                return r.json();
+            })
+            .then(data => {
+                results.innerHTML += '<p>Simple CORS Data: ' + JSON.stringify(data) + '</p>';
+            })
+            .catch(e => {
+                results.innerHTML += '<p>❌ Simple CORS Error: ' + e.message + '</p>';
+            });
+            
+        // Test 2: Health endpoint
+        fetch('https://graceful-benevolence-production.up.railway.app/health')
+            .then(r => {
+                results.innerHTML += '<p>✅ Health: ' + r.status + '</p>';
+                return r.json();
+            })
+            .then(data => {
+                results.innerHTML += '<p>Health Data: ' + JSON.stringify(data) + '</p>';
+            })
+            .catch(e => {
+                results.innerHTML += '<p>❌ Health Error: ' + e.message + '</p>';
+            });
+            
+        // Test 3: Menu endpoint
+        fetch('https://graceful-benevolence-production.up.railway.app/api/menu')
+            .then(r => {
+                results.innerHTML += '<p>✅ Menu: ' + r.status + '</p>';
+                return r.json();
+            })
+            .then(data => {
+                results.innerHTML += '<p>Menu Data: ' + data.length + ' items found</p>';
+            })
+            .catch(e => {
+                results.innerHTML += '<p>❌ Menu Error: ' + e.message + '</p>';
+            });
+            
+        // Test 4: CORS header inspection
+        fetch('https://graceful-benevolence-production.up.railway.app/cors-test')
+            .then(r => {
+                results.innerHTML += '<p>✅ CORS Test: ' + r.status + '</p>';
+                results.innerHTML += '<p>Headers: ' + JSON.stringify([...r.headers.entries()]) + '</p>';
+                return r.json();
+            })
+            .then(data => {
+                results.innerHTML += '<p>CORS Test Data: ' + JSON.stringify(data) + '</p>';
+            })
+            .catch(e => {
+                results.innerHTML += '<p>❌ CORS Test Error: ' + e.message + '</p>';
+            });
+    </script>
+</body>
+</html>
+  `);
 });
 
 // SIMPLE CORS TEST - basic endpoint

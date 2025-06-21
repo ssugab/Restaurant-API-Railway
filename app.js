@@ -93,6 +93,12 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve test API tool
+app.get('/test-api.html', (req, res) => {
+  const path = require('path');
+  res.sendFile(path.join(__dirname, 'test-api.html'));
+});
+
 // Routes
 app.use('/api/auth', authRoutes); // Authentication routes (login & register)
 app.use('/api/users', userRoutes); // User CRUD and login/register

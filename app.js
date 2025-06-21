@@ -38,6 +38,7 @@ const allowedOrigins = [
   'https://pemesanan-menu-restoran.vercel.app',
   'https://pemesanan-menu-restoran-ewxlu8c2g-bagus-projects-d637296f.vercel.app',
   'https://menu-restaurant-fe.vercel.app',
+  'https://menu-restaurant-fe-ver2.vercel.app',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:5500'

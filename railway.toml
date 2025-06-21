@@ -2,4 +2,5 @@
   dockerfilePath = "Dockerfile"
 
 [build.env]
-  NODE_ENV = "production" 
+  NODE_ENV = "production"
+  FRONTEND_URL = "pemesanan-menu-restoran-api.vercel.app" 

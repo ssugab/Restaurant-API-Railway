@@ -20,9 +20,11 @@ const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
         process.env.FRONTEND_URL,
-        'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app', // URL deployment baru
+        'https://restaurant-fe-vercel.vercel.app', // Domain Vercel repository baru
+        'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app', // URL deployment lama
         'https://pemesanan-menu-restoran-api.vercel.app',
         'https://pemesanan-menu-restoran.vercel.app',
+        /https:\/\/restaurant-fe-vercel.*\.vercel\.app$/, // Pattern untuk repository baru
         /https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/, // Pattern untuk semua deployment URL Vercel
         // Tambahkan lebih banyak fallback patterns
         /https:\/\/.*bagus-projects-d637296f\.vercel\.app$/,
@@ -49,9 +51,9 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   console.log('🌐 Request from origin:', origin);
   
-  // Allow all Vercel domains that contain 'pemesanan-menu-restoran' or 'bagus-projects'
+  // Allow all Vercel domains that contain 'restaurant-fe-vercel', 'pemesanan-menu-restoran' or 'bagus-projects'
   if (origin && origin.includes('vercel.app') && 
-      (origin.includes('pemesanan-menu-restoran') || origin.includes('bagus-projects-d637296f'))) {
+      (origin.includes('restaurant-fe-vercel') || origin.includes('pemesanan-menu-restoran') || origin.includes('bagus-projects-d637296f'))) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -59,13 +61,14 @@ app.use((req, res, next) => {
     console.log('✅ Manual CORS headers set for Vercel domain:', origin);
   }
   
-  // Also allow specific frontend URL as fallback
-  if (origin === 'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app') {
+  // Also allow specific frontend URLs as fallback
+  if (origin === 'https://restaurant-fe-vercel.vercel.app' || 
+      origin === 'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app') {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
-    console.log('✅ Explicit CORS headers set for frontend URL');
+    console.log('✅ Explicit CORS headers set for frontend URL:', origin);
   }
   
   if (req.method === 'OPTIONS') {
@@ -93,12 +96,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve test API tool
-app.get('/test-api.html', (req, res) => {
-  const path = require('path');
-  res.sendFile(path.join(__dirname, 'test-api.html'));
-});
-
 // Routes
 app.use('/api/auth', authRoutes); // Authentication routes (login & register)
 app.use('/api/users', userRoutes); // User CRUD and login/register
@@ -111,34 +108,6 @@ app.use('/api', apikeyRoutes);
 // Test route
 app.get('/test', (req, res) => {
   res.json({ message: 'Server is running!', timestamp: new Date().toISOString() });
-});
-
-// Quick API test endpoint
-app.get('/api/test', async (req, res) => {
-  try {
-    const Menu = require('./scr/models/menu');
-    const Kategori = require('./scr/models/kategori');
-    
-    const menuCount = await Menu.count();
-    const categoryCount = await Kategori.count();
-    
-    res.json({
-      status: 'API Working',
-      database: {
-        connected: true,
-        menuItems: menuCount,
-        categories: categoryCount
-      },
-      environment: process.env.NODE_ENV || 'development',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'Database Error',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
 });
 
 // Error handling middleware

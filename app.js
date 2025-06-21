@@ -133,8 +133,13 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Routes
-app.use('/api/auth', authRoutes); // Authentication routes (login & register)
+// Routes with logging
+console.log('🔗 Registering routes...');
+app.use('/api/auth', (req, res, next) => {
+  console.log(`   🔐 AUTH ROUTE: ${req.method} ${req.originalUrl}`);
+  next();
+}, authRoutes); // Authentication routes (login & register)
+
 app.use('/api/users', userRoutes); // User CRUD and login/register
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
@@ -142,9 +147,39 @@ app.use('/api/kategori', kategoriRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api', apikeyRoutes);
 
+console.log('✅ All routes registered successfully');
+
 // Test route
 app.get('/test', (req, res) => {
   res.json({ message: 'Server is running!', timestamp: new Date().toISOString() });
+});
+
+// Debug routes - Show all registered routes
+app.get('/debug-routes', (req, res) => {
+  const routes = [];
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) { // Routes registered directly on the app
+      routes.push({
+        path: middleware.route.path,
+        methods: Object.keys(middleware.route.methods)
+      });
+    } else if (middleware.name === 'router') { // Router middleware
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          routes.push({
+            path: handler.route.path,
+            methods: Object.keys(handler.route.methods)
+          });
+        }
+      });
+    }
+  });
+  
+  res.json({
+    message: 'Available routes',
+    routes: routes,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // CORS Test endpoint - JSON response untuk testing

@@ -20,24 +20,24 @@
     <div class="container">
         <h1>🧪 Test Railway Backend API</h1>
         <p><strong>Backend URL:</strong> https://handsome-blessing-production.up.railway.app</p>
-        
+
         <div class="endpoint">
-            <h3>1. Health Check</h3>
-            <button onclick="testHealth()">Test /health</button>
+        <h3>1. Health Check</h3>
+        <button onclick="testHealth()">Test /health</button>
             <div id="health-result"></div>
-        </div>
+    </div>
 
         <div class="endpoint">
             <h3>2. Menu Items</h3>
             <button onclick="testMenu()">Test /api/menu</button>
             <div id="menu-result"></div>
-        </div>
+    </div>
 
         <div class="endpoint">
             <h3>3. Categories</h3>
             <button onclick="testCategories()">Test /api/kategori</button>
             <div id="categories-result"></div>
-        </div>
+    </div>
 
         <div class="endpoint">
             <h3>4. Test CORS</h3>
@@ -52,7 +52,7 @@
         async function testHealth() {
             const resultDiv = document.getElementById('health-result');
             resultDiv.innerHTML = '<div class="loading">Testing...</div>';
-            
+
             try {
                 const response = await fetch(`${API_BASE}/health`);
                 const data = await response.json();
@@ -81,7 +81,7 @@
         async function testMenu() {
             const resultDiv = document.getElementById('menu-result');
             resultDiv.innerHTML = '<div class="loading">Testing...</div>';
-            
+
             try {
                 const response = await fetch(`${API_BASE}/api/menu`, {
                     headers: {
@@ -116,7 +116,7 @@
         async function testCategories() {
             const resultDiv = document.getElementById('categories-result');
             resultDiv.innerHTML = '<div class="loading">Testing...</div>';
-            
+
             try {
                 const response = await fetch(`${API_BASE}/api/kategori`);
                 const data = await response.json();
@@ -146,7 +146,7 @@
         async function testCORS() {
             const resultDiv = document.getElementById('cors-result');
             resultDiv.innerHTML = '<div class="loading">Testing CORS...</div>';
-            
+
             try {
                 const response = await fetch(`${API_BASE}/api/menu`, {
                     method: 'OPTIONS',

@@ -36,6 +36,7 @@ const allowedOrigins = [
   'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app',
   'https://pemesanan-menu-restoran-api.vercel.app',
   'https://pemesanan-menu-restoran.vercel.app',
+  'https://pemesanan-menu-restoran-ewxlu8c2g-bagus-projects-d637296f.vercel.app',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:5500'
@@ -106,6 +107,33 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api', apikeyRoutes);
 
 console.log('✅ All routes registered successfully');
+
+// Seed database endpoint
+app.get('/api/seed', async (req, res) => {
+  try {
+    console.log('🌱 Manual seed database triggered...');
+    const seedDatabase = require('./seed-database');
+    await seedDatabase();
+    res.json({ 
+      success: true,
+      message: '✅ Database seeded successfully!',
+      timestamp: new Date().toISOString(),
+      data: {
+        users: '3 admin accounts created',
+        categories: '3 categories created',
+        menus: '100+ menu items created'
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error seeding database:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to seed database',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 
 // Test route
 app.get('/test', (req, res) => {

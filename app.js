@@ -17,52 +17,7 @@ const app = express();
 
 // CORS configuration - Allow all Vercel domains and specific origins
 const corsOptions = {
-  origin: function (origin, callback) {
-    console.log('🔍 CORS Origin Check:', origin);
-    
-    // Allow requests with no origin (mobile apps, postman, etc.)
-    if (!origin) {
-      console.log('✅ No origin - allowing request');
-      return callback(null, true);
-    }
-
-    // List of allowed origins
-    const allowedOrigins = [
-      'https://restaurant-fe-vercel.vercel.app',
-      'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app',
-      'https://pemesanan-menu-restoran-api.vercel.app',
-      'https://pemesanan-menu-restoran.vercel.app',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000', 
-      'http://localhost:5500',
-      process.env.FRONTEND_URL
-    ].filter(Boolean); // Remove null/undefined entries
-
-    // Check if origin is in allowed list
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ Origin allowed from static list:', origin);
-      return callback(null, true);
-    }
-
-    // Check patterns for Vercel domains
-    const vercelPatterns = [
-      /^https:\/\/restaurant-fe-vercel.*\.vercel\.app$/,
-      /^https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/,
-      /^https:\/\/.*bagus-projects-d637296f\.vercel\.app$/,
-      /^https:\/\/.*\.vercel\.app$/
-    ];
-
-    for (const pattern of vercelPatterns) {
-      if (pattern.test(origin)) {
-        console.log('✅ Origin allowed by pattern:', origin, 'Pattern:', pattern);
-        return callback(null, true);
-      }
-    }
-
-    console.log('❌ Origin not allowed:', origin);
-    console.log('📋 Allowed origins:', allowedOrigins);
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true, // Allow all origins for now - will be filtered by manual middleware
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Origin', 'X-Requested-With', 'Accept'],
@@ -79,13 +34,15 @@ console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
 // Middleware - Apply CORS first
 app.use(cors(corsOptions));
 
-// Simplified and robust CORS middleware
+// Manual CORS middleware with better logging
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  const timestamp = new Date().toISOString();
   
-  console.log('🌐 Request:', req.method, req.url, 'from origin:', origin);
+  console.log(`\n🌐 [${timestamp}] ${req.method} ${req.url}`);
+  console.log(`   Origin: ${origin || 'NO-ORIGIN'}`);
 
-  // Always set CORS headers for known domains
+  // List of allowed origins
   const allowedOrigins = [
     'https://restaurant-fe-vercel.vercel.app',
     'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app',
@@ -96,45 +53,48 @@ app.use((req, res, next) => {
     'http://localhost:5500'
   ];
 
-  // Check exact match first
-  if (origin && allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
+  // Set CORS headers for allowed origins
+  if (!origin) {
+    // No origin (Postman, mobile apps, etc.)
+    console.log('   ✅ NO ORIGIN - Allowing request');
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
-    res.header('Access-Control-Expose-Headers', 'Authorization');
-    console.log('✅ CORS allowed for:', origin);
-  } 
-  // Check Vercel patterns
-  else if (origin && origin.includes('vercel.app') && 
-           (origin.includes('restaurant-fe-vercel') || 
-            origin.includes('pemesanan-menu-restoran') || 
-            origin.includes('bagus-projects-d637296f'))) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
-    res.header('Access-Control-Expose-Headers', 'Authorization');
-    console.log('✅ CORS allowed for Vercel domain:', origin);
   }
-  // For development and testing - allow all localhost
+  else if (allowedOrigins.includes(origin)) {
+    console.log('   ✅ ALLOWED ORIGIN - Setting CORS headers for:', origin);
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
+    res.header('Access-Control-Expose-Headers', 'Authorization');
+  }
+  else if (origin && origin.includes('vercel.app')) {
+    // Allow all Vercel domains as fallback
+    console.log('   ⚠️  VERCEL DOMAIN - Allowing as fallback:', origin);
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
+    res.header('Access-Control-Expose-Headers', 'Authorization');
+  }
   else if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+    console.log('   ✅ LOCALHOST - Allowing for development:', origin);
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
     res.header('Access-Control-Expose-Headers', 'Authorization');
-    console.log('✅ CORS allowed for localhost:', origin);
   }
-  else if (origin) {
-    console.log('❌ CORS blocked for:', origin);
+  else {
+    console.log('   ❌ BLOCKED ORIGIN:', origin);
+    console.log('   📋 Allowed origins:', allowedOrigins);
   }
 
   // Handle preflight OPTIONS requests
   if (req.method === 'OPTIONS') {
-    console.log('🔄 OPTIONS preflight - sending 200');
-    res.status(200).end();
-    return;
+    console.log('   🔄 PREFLIGHT OPTIONS - Returning 200 OK');
+    return res.status(200).end();
   }
 
   next();
@@ -149,23 +109,13 @@ app.use(express.static('./', {
   maxAge: '1d'  // Cache for 1 day
 }));
 
-// Enhanced request logging middleware
+// Additional logging for debug
 app.use((req, res, next) => {
-  const timestamp = new Date().toISOString();
-  const origin = req.headers.origin || 'no-origin';
-  const userAgent = req.headers['user-agent'] || 'no-user-agent';
-  
-  console.log(`📝 ${timestamp} - ${req.method} ${req.url}`);
-  console.log(`   Origin: ${origin}`);
-  console.log(`   User-Agent: ${userAgent.substring(0, 100)}...`);
-  
-  // Log CORS-related headers
-  if (req.method === 'OPTIONS') {
-    console.log('   🔄 PREFLIGHT REQUEST');
-    console.log('   Access-Control-Request-Method:', req.headers['access-control-request-method']);
-    console.log('   Access-Control-Request-Headers:', req.headers['access-control-request-headers']);
+  // Skip logging if already handled by CORS middleware
+  if (req.method !== 'OPTIONS') {
+    const userAgent = req.headers['user-agent'] || 'no-user-agent';
+    console.log(`   User-Agent: ${userAgent.substring(0, 80)}...`);
   }
-  
   next();
 });
 

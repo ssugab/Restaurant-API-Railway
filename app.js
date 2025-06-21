@@ -22,6 +22,7 @@ const corsOptions = {
         process.env.FRONTEND_URL,
         'https://pemesanan-menu-restoran-neydezgzf-bagus-projects-d637296f.vercel.app',
         'https://pemesanan-menu-restoran-l7a89bujt-bagus-projects-d637296f.vercel.app',
+        'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app', // URL deployment baru
         'https://pemesanan-menu-restoran-api.vercel.app',
         'https://pemesanan-menu-restoran.vercel.app',
         /https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/ // Pattern untuk semua deployment URL Vercel
@@ -47,12 +48,13 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   console.log('🌐 Request from origin:', origin);
   
-  if (origin && origin.includes('vercel.app')) {
+  // Allow all Vercel domains that contain 'pemesanan-menu-restoran'
+  if (origin && (origin.includes('vercel.app') && origin.includes('pemesanan-menu-restoran'))) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
-    console.log('✅ Manual CORS headers set for:', origin);
+    console.log('✅ Manual CORS headers set for Vercel domain:', origin);
   }
   
   if (req.method === 'OPTIONS') {

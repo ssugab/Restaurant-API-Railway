@@ -113,6 +113,34 @@ app.get('/test', (req, res) => {
   res.json({ message: 'Server is running!', timestamp: new Date().toISOString() });
 });
 
+// Quick API test endpoint
+app.get('/api/test', async (req, res) => {
+  try {
+    const Menu = require('./scr/models/menu');
+    const Kategori = require('./scr/models/kategori');
+    
+    const menuCount = await Menu.count();
+    const categoryCount = await Kategori.count();
+    
+    res.json({
+      status: 'API Working',
+      database: {
+        connected: true,
+        menuItems: menuCount,
+        categories: categoryCount
+      },
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'Database Error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);

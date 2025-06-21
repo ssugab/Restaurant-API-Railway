@@ -15,26 +15,14 @@ const apikeyRoutes = require('./scr/routes/apikey');
 
 const app = express();
 
-// CORS configuration - Allow all Vercel domains and specific origins
-const corsOptions = {
-  origin: true, // Allow all origins for now - will be filtered by manual middleware
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Origin', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Authorization'],
-  optionsSuccessStatus: 200,
-  preflightContinue: false
-};
+// Using manual CORS middleware instead of cors() library for better control
 
 // Debug CORS configuration
 console.log('🔧 CORS Configuration:');
 console.log('- NODE_ENV:', process.env.NODE_ENV);
 console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
 
-// Middleware - Apply CORS first
-app.use(cors(corsOptions));
-
-// Manual CORS middleware with better logging
+// Comprehensive CORS middleware - Handles everything in one place
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   const timestamp = new Date().toISOString();
@@ -53,47 +41,64 @@ app.use((req, res, next) => {
     'http://localhost:5500'
   ];
 
-  // Set CORS headers for allowed origins
+  // ALWAYS set CORS headers first
+  let isAllowed = false;
+  
   if (!origin) {
     // No origin (Postman, mobile apps, etc.)
-    console.log('   ✅ NO ORIGIN - Allowing request');
+    console.log('   ✅ NO ORIGIN - Setting wildcard CORS');
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
+    isAllowed = true;
   }
   else if (allowedOrigins.includes(origin)) {
-    console.log('   ✅ ALLOWED ORIGIN - Setting CORS headers for:', origin);
+    console.log('   ✅ ALLOWED ORIGIN - Setting CORS for:', origin);
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
     res.header('Access-Control-Expose-Headers', 'Authorization');
+    isAllowed = true;
   }
   else if (origin && origin.includes('vercel.app')) {
     // Allow all Vercel domains as fallback
-    console.log('   ⚠️  VERCEL DOMAIN - Allowing as fallback:', origin);
+    console.log('   ⚠️  VERCEL FALLBACK - Setting CORS for:', origin);
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
     res.header('Access-Control-Expose-Headers', 'Authorization');
+    isAllowed = true;
   }
   else if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-    console.log('   ✅ LOCALHOST - Allowing for development:', origin);
+    console.log('   ✅ LOCALHOST - Setting CORS for:', origin);
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
     res.header('Access-Control-Expose-Headers', 'Authorization');
+    isAllowed = true;
   }
   else {
-    console.log('   ❌ BLOCKED ORIGIN:', origin);
-    console.log('   📋 Allowed origins:', allowedOrigins);
+    // Even for blocked origins, set basic CORS to avoid browser errors
+    console.log('   ❌ UNKNOWN ORIGIN - Setting basic CORS anyway:', origin);
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Origin, X-Requested-With, Accept');
+    isAllowed = false; // But log as not allowed
   }
+
+  // Log final headers set
+  console.log('   📋 CORS Headers Set:', {
+    'Access-Control-Allow-Origin': res.get('Access-Control-Allow-Origin'),
+    'Access-Control-Allow-Methods': res.get('Access-Control-Allow-Methods'),
+    'Access-Control-Allow-Headers': res.get('Access-Control-Allow-Headers')
+  });
 
   // Handle preflight OPTIONS requests
   if (req.method === 'OPTIONS') {
-    console.log('   🔄 PREFLIGHT OPTIONS - Returning 200 OK');
+    console.log('   🔄 PREFLIGHT - Sending 200 OK with CORS headers');
     return res.status(200).end();
   }
 
@@ -163,9 +168,19 @@ app.get('/cors-test', (req, res) => {
   res.json(corsInfo);
 });
 
-// Error handling middleware
+// Error handling middleware with CORS headers
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error('❌ Error occurred:', err);
+  
+  // Ensure CORS headers are set even on error
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
   res.status(500).json({ 
     error: 'Internal Server Error',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'

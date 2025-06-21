@@ -20,12 +20,13 @@ const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
         process.env.FRONTEND_URL,
-        'https://pemesanan-menu-restoran-neydezgzf-bagus-projects-d637296f.vercel.app',
-        'https://pemesanan-menu-restoran-l7a89bujt-bagus-projects-d637296f.vercel.app',
         'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app', // URL deployment baru
         'https://pemesanan-menu-restoran-api.vercel.app',
         'https://pemesanan-menu-restoran.vercel.app',
-        /https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/ // Pattern untuk semua deployment URL Vercel
+        /https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/, // Pattern untuk semua deployment URL Vercel
+        // Tambahkan lebih banyak fallback patterns
+        /https:\/\/.*bagus-projects-d637296f\.vercel\.app$/,
+        /https:\/\/.*\.vercel\.app$/
       ] 
     : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500'],
   credentials: true,
@@ -48,13 +49,23 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   console.log('🌐 Request from origin:', origin);
   
-  // Allow all Vercel domains that contain 'pemesanan-menu-restoran'
-  if (origin && (origin.includes('vercel.app') && origin.includes('pemesanan-menu-restoran'))) {
+  // Allow all Vercel domains that contain 'pemesanan-menu-restoran' or 'bagus-projects'
+  if (origin && origin.includes('vercel.app') && 
+      (origin.includes('pemesanan-menu-restoran') || origin.includes('bagus-projects-d637296f'))) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
     console.log('✅ Manual CORS headers set for Vercel domain:', origin);
+  }
+  
+  // Also allow specific frontend URL as fallback
+  if (origin === 'https://pemesanan-menu-restoran-7adgfgi28-bagus-projects-d637296f.vercel.app') {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
+    console.log('✅ Explicit CORS headers set for frontend URL');
   }
   
   if (req.method === 'OPTIONS') {

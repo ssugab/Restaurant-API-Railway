@@ -19,18 +19,48 @@ const app = express();
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        process.env.FRONTEND_URL, 
+        process.env.FRONTEND_URL,
         'https://pemesanan-menu-restoran-neydezgzf-bagus-projects-d637296f.vercel.app',
-        'https://pemesanan-menu-restoran.vercel.app' // fallback jika URL berubah
+        'https://pemesanan-menu-restoran-l7a89bujt-bagus-projects-d637296f.vercel.app',
+        'https://pemesanan-menu-restoran.vercel.app',
+        /https:\/\/pemesanan-menu-restoran.*\.vercel\.app$/ // Pattern untuk semua deployment URL Vercel
       ] 
     : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
+
+// Debug CORS configuration
+console.log('🔧 CORS Configuration:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('- Allowed Origins:', corsOptions.origin);
 
 // Middleware
 app.use(cors(corsOptions));
+
+// Manual CORS fallback
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log('🌐 Request from origin:', origin);
+  
+  if (origin && origin.includes('vercel.app')) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
+    console.log('✅ Manual CORS headers set for:', origin);
+  }
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
